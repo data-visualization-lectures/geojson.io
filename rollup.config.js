@@ -4,6 +4,7 @@ import replace from '@rollup/plugin-replace';
 import markdown from '@jackfranklin/rollup-plugin-markdown';
 import css from 'rollup-plugin-import-css';
 import copy from 'rollup-plugin-copy';
+import dotenv from 'rollup-plugin-dotenv';
 
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
@@ -19,13 +20,16 @@ export default {
     strict: false
   },
   plugins: [
+    dotenv(),
     commonjs({
       include: ['./src/**/*', './node_modules/**/*'],
       transformMixedEsModules: true
     }),
 
     replace({
-      'require.main === module': 'false' // jsonhint export quirk
+      'require.main === module': 'false', // jsonhint export quirk
+      preventAssignment: true,
+      'process.env.MAPBOX_ACCESS_TOKEN': JSON.stringify(process.env.MAPBOX_ACCESS_TOKEN)
     }),
 
     resolve({
