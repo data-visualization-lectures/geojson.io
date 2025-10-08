@@ -102,8 +102,8 @@ module.exports = function (context, readonly) {
     context.map = new mapboxgl.Map({
       container: 'map',
       style,
-      center: [20, 0],
-      zoom: 2,
+      center: [139.6917, 35.6895],
+      zoom: 5,
       projection,
       hash: 'map'
     });
