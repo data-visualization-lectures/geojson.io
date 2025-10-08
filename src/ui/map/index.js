@@ -96,7 +96,8 @@ module.exports = function (context, readonly) {
     );
 
     const projection = context.storage.get('projection') || DEFAULT_PROJECTION;
-    const activeStyle = context.storage.get('style') || DEFAULT_STYLE;
+    context.storage.set('style', DEFAULT_STYLE);
+    const activeStyle = DEFAULT_STYLE;
     const { style } = styles.find((d) => d.title === activeStyle);
 
     context.map = new mapboxgl.Map({
