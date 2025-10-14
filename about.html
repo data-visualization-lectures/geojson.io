@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>GeoJSONの編集について</title>
+        <link rel='stylesheet' type='text/css' href='css/style.css' />
+        <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+        <meta name='viewport' content='initial-scale=1.0 maximum-scale=1.0'>
+        <style>
+        body {
+            font:normal 14px/25px sans-serif;
+            max-width:700px;
+            margin:50px auto;
+            color:#333;
+        }
+        a {
+            color:blue;
+        }
+        h1 {
+            margin-top:40px;
+        }
+        img {
+            max-width:100%;
+        }
+        </style>
+    </head>
+    <body>
+        <h1>geojson.io</h1>
+        <p>地図をすばやく簡単に作成、変更、公開するためのツールです。</p>
+        <h1 id='extension'>Chrome拡張機能</h1>
+        <!-- <img alt='GitHub Extension' src='http://i.cloudup.com/d6Z9dko1gr.png' /> -->
+        <p>
+        <a href='https://chrome.google.com/webstore/detail/geojsonio/oibjgofbhldcajfamjganpeacipebckp'>geojson.io拡張機能の最新リリースをダウンロード</a>
+        して、<a href='http://github.com/'>GitHub</a>上の該当するGistやファイルに「geojson.io」ボタンを追加します。
+        </p>
+        <h1 id='source'>オープンソース</h1>
+        <p>このサイトは<a href='http://github.com/mapbox/geojson.io'>オープンソースプロジェクト</a>です。</p>
+        <h1 id='restrictions'>ライセンスと制限事項</h1>
+        <p>これは、寛容なMITライセンスの下で提供されるオープンソースソフトウェアです。
+        そのライセンスは、geojson.ioで作成したデータではなく、<em>ソフトウェア</em>に適用されます。このツールを使用しても、プライベート、著作権、
+        オープン、またはその他の種類のデータを安全に編集でき、ツールの法的地位は変わりません。</p>
+        <h1 id='faq'>よくある質問</h1>
+        <h2 id='what-now'>地図を作成しましたが、次に何をすればよいですか？</h2>
+        <p>地図を共有したいだけの場合は、「共有」タブをクリックして
+        友人にリンクを送信したり、ウェブサイトに埋め込むためのHTMLを取得したりできます。</p>
+        <p>より柔軟に利用するには、GeoJSONデータをダウンロードして、さまざまなツールで使用できます。</p>
+        <ul>
+            <li><a href='https://docs.mapbox.com/help/glossary/mapbox-studio/'>Mapbox Studio</a>は、すばらしいスタイル柔軟性を備えた地図をデザインするための無料のオンラインブラウザアプリケーションです。
+            <li><a href='http://qgis.org/'>QGIS</a>は、データのGIS分析を行うためのオープンソースの無料デスクトップアプリケーションです。
+            <li><a href='http://leafletjs.com/'>Leaflet</a>は、ウェブページに地図を埋め込むためのオープンソースの地図フレームワークです。
+        </ul>
+        <h2 id='other-formats'>シェープファイルまたはサポートされていない形式をインポートするにはどうすればよいですか？</h2>
+        <p>geojson.ioはシェープファイルのインポートを直接サポートしていませんが、最初にシェープファイルをGeoJSONに変換してから、GeoJSONを
+        geojson.ioにアップロードできます。</p>
+        <ul>
+            <li><a href='http://ogre.adc4gis.com/'>ogre</a>、シェープファイルからgeojsonへの変換用のオンラインツール</li>
+            <li><a href='http://www.shpescape.com/'>shpescape</a>、変換をサポートする別のオンラインツール</li>
+            <li><a href='http://www.arc2earth.com/'>Arc2Earth</a>、GeoJSONをエクスポートするArcGISプラグイン</li>
+            <li><a href='https://github.com/project-open-data/esri2open'>esri2open</a>、ESRIフィーチャクラスをGeoJSONに変換するPythonスクリプト</li>
+        </ul>
+    </body>
+</html>
