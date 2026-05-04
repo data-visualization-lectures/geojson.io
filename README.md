@@ -41,14 +41,36 @@ If you get an error resolving dependencies related to `rollup` on newer versions
 
 `npm run deploy` runs `deploy.sh`, which creates a production build locally and force-pushes the deployment worktree to the `gh-pages` branch.
 
-Netlify memo:
+### Netlify Deployment Workflow
 
-- 作業と修正は `main`
-- `main` で `npm run deploy`
-- 生成物は `gh-pages` に force push
-- Netlify の Production branch は `gh-pages`
-- Netlify の Build command は空欄
-- Netlify の Publish directory は `.`
+このリポジトリでは、デプロイのために 2 つのブランチを使います。
+
+- `main`: ソースコード、ドキュメント、日常の修正作業を行うブランチ
+- `gh-pages`: `npm run deploy` でローカル build した成果物を置く配信用ブランチ
+
+Netlify 側の設定は次の通りです。
+
+- Production branch: `gh-pages`
+- Build command: 空欄
+- Publish directory: `.`
+
+今後の標準手順は次の通りです。
+
+1. `main` に切り替える
+2. 最新の `main` を pull する
+3. 修正作業を `main` で行う
+4. 必要に応じて `npm start` でローカル確認する
+5. `npm run build` を実行して本番 build が通ることを確認する
+6. `main` の変更を commit / push する
+7. 引き続き `main` で `npm run deploy` を実行する
+8. `gh-pages` に force-push されたことと、Netlify の deploy が始まったことを確認する
+
+注意点:
+
+- `gh-pages` は生成物ブランチなので、通常は直接編集しない
+- `main` を push しただけでは公開は更新されず、公開更新には `npm run deploy` が必要
+- `npm run deploy` は `gh-pages` を force-push するため、先に `main` の反映したい変更を commit しておく
+- GitHub Desktop では通常 `main` を確認し、`gh-pages` は生成物確認用と考える
 
 ## License
 
