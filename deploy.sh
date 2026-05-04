@@ -1,18 +1,52 @@
-branch=$(git symbolic-ref --short HEAD)
+#!/bin/sh
 
-git checkout --orphan deploy
+set -eu
 
-npm install
+branch=$(git symbolic-ref --quiet --short HEAD || true)
+if [ "$branch" != "main" ]; then
+  echo "Error: npm run deploy must be run from the main branch." >&2
+  exit 1
+fi
+
+repo_root=$(git rev-parse --show-toplevel)
+head_sha=$(git rev-parse --short HEAD)
+temp_root=$(mktemp -d "${TMPDIR:-/tmp}/geojson-deploy.XXXXXX")
+deploy_dir="$temp_root/worktree"
+
+cleanup() {
+  if [ -d "${deploy_dir:-}" ]; then
+    git -C "$repo_root" worktree remove --force "$deploy_dir" >/dev/null 2>&1 || true
+  fi
+  if [ -d "${temp_root:-}" ]; then
+    rm -rf "$temp_root"
+  fi
+}
+
+trap cleanup EXIT INT TERM HUP
+
+if ! git diff --quiet --ignore-submodules HEAD --; then
+  echo "Error: main has unstaged tracked changes. Commit or stash them before deploy." >&2
+  exit 1
+fi
+
+if ! git diff --cached --quiet --ignore-submodules --; then
+  echo "Error: main has staged but uncommitted changes. Commit them before deploy." >&2
+  exit 1
+fi
+
+if [ ! -d node_modules ]; then
+  npm install
+fi
+
 npm run build
 
-# include /dist in the commit
-rm -rf .gitignore
-echo "/node_modules\n.DS_Store" > .gitignore
+git worktree add --detach "$deploy_dir" HEAD >/dev/null
 
-git add -A  # Add all files and commit them
-git commit -m "deploy"
+mkdir -p "$deploy_dir/dist"
+cp -R "$repo_root/dist/." "$deploy_dir/dist/"
 
-git branch -D gh-pages  # Deletes the gh-pages branch
-git branch -m gh-pages  # Rename the current branch to gh-pages
-git push -f origin gh-pages  # Force push gh-pages branch to github
-git checkout $branch
+git -C "$deploy_dir" add -f dist
+git -C "$deploy_dir" commit --no-verify -m "deploy: $head_sha" >/dev/null
+git -C "$deploy_dir" push --force origin HEAD:gh-pages
+
+echo "Deployed $head_sha to origin/gh-pages"

@@ -37,9 +37,19 @@ If you get an error resolving dependencies related to `rollup` on newer versions
 
 ## Production Build & Deployment
 
-`npm run build` will create minified bundles in `/dist`. You can try out the production build with `npm run serve` which will run live-server.
+`npm run build` creates the production assets in `/dist`. You can preview the production build locally with `npm run serve`.
 
-`npm run deploy` runs `deploy.sh`, which creates a production build locally and force-pushes the deployment worktree to the `gh-pages` branch.
+Run `npm run deploy` from `main` after your changes are committed. The deploy script:
+
+1. checks that `main` has no uncommitted tracked changes
+2. runs `npm install` only if `node_modules` is missing
+3. runs `npm run build`
+4. creates a temporary detached worktree from `main`
+5. copies the built `dist/` directory into that worktree
+6. creates a deploy commit with `--no-verify`
+7. force-pushes that commit to `origin/gh-pages`
+
+This avoids deleting or reassigning a local `gh-pages` branch, so it still works if `gh-pages` is checked out in another worktree.
 
 Netlify memo:
 

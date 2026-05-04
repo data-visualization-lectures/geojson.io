@@ -98,9 +98,10 @@ npm run serve
 
 ### 実行前の注意
 
-- `npm run deploy` は `gh-pages` ブランチを作り直して `origin/gh-pages` に force push します
-- ローカルの `gh-pages` ブランチも削除して作り直します
-- 作業ツリーが汚れている状態で実行すると戻しづらくなるので、先に commit するか stash してください
+- `npm run deploy` は `main` の commit を基準に build して `origin/gh-pages` に force push します
+- `main` に未 commit の変更があると deploy は止まります
+- ローカルの `gh-pages` worktree が別に存在していても deploy 自体は実行できます
+- Netlify が参照するのは remote の `gh-pages` です
 
 ### 実行手順
 
@@ -128,12 +129,13 @@ npm run deploy
 
 `npm run deploy` は内部で [deploy.sh](./deploy.sh) を実行し、次をまとめて行います。
 
-1. 一時的な orphan branch を作成
-2. `npm install`
+1. `main` に未 commit の tracked 変更がないことを確認
+2. 必要なら `npm install`
 3. `npm run build`
-4. `gh-pages` ブランチを再作成
-5. `origin/gh-pages` へ force push
-6. 元のブランチへ戻る
+4. 一時 detached worktree を作成
+5. build 済みの `dist/` をその worktree にコピー
+6. deploy 用 commit を `--no-verify` で作成
+7. `origin/gh-pages` へ force push
 
 ## Netlify 設定
 
@@ -162,7 +164,7 @@ npm install --force
 
 この回避策で入れ直した場合、`package-lock.json` の差分をそのまま commit しないよう注意してください。
 
-### `npm run deploy` が怖い
+### `npm run deploy` が `gh-pages` worktree とぶつかる
 
-その理解で合っています。  
-このスクリプトは安全側の deploy ではなく、`gh-pages` を毎回作り直す前提です。初回は必ず内容を確認してから実行してください。
+今の deploy スクリプトは、ローカルの `gh-pages` branch を削除・付け替えません。  
+そのため `gh-pages` を別 worktree で開いていても、remote の `gh-pages` へ deploy できます。
