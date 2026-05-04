@@ -1,77 +1,168 @@
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fmapbox%2Fgeojson.io.svg?type=shield)](https://app.fossa.io/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fmapbox%2Fgeojson.io?ref=badge_shield)
-
 # geojson.io
 
-![](http://i.cloudup.com/kz3BAF7Hnx.png)
+Prj_DatavizJP 向けに調整している `geojson.io` の、初見者向けビルド・デプロイ手順です。  
+コードを書き始める前に、この README の順番どおりに進めればローカル起動から Netlify 公開まで一通り確認できます。
 
-A fast, simple editor for map data. Read more on [Mapbox](https://www.mapbox.com/blog/geojsonio-announce/),
-[macwright.org](https://macwright.org/2013/07/26/geojsonio.html).
+英語版の元 README は [README_en.md](./README_en.md) を参照してください。
 
-## Goes Great With!
+## 前提条件
 
-**Tools**
+- `Node.js 14.x`
+- `npm`
+- GitHub リポジトリへの push 権限
+- Netlify サイトの設定変更権限
+- Mapbox の public access token
 
-- [Using geojson.io with GitHub is better with the Chrome Extension](https://chrome.google.com/webstore/detail/geojsonio/oibjgofbhldcajfamjganpeacipebckp)
-- [geojsonio-cli](https://github.com/mapbox/geojsonio-cli) lets you shoot geojson from your terminal to geojson.io! (with nodejs)
-- [geojsonio.py](https://github.com/jwass/geojsonio.py) lets you shoot geojson from your terminal to geojson.io! (with python)
+`package.json` の `engines.node` は `14` です。  
+Node の切り替えに `nvm` を使う場合は、先に以下を実行してください。
 
-## API
+```bash
+nvm install 14
+nvm use 14
+```
 
-You can interact with geojson.io programmatically via URL parameters. Here is an example of geojson encoded into the URL:
+## 初回セットアップ
 
-http://geojson.io/#data=data:application/json,%7B%22type%22%3A%22LineString%22%2C%22coordinates%22%3A%5B%5B0%2C0%5D%2C%5B10%2C10%5D%5D%7D
+1. リポジトリを clone して移動します。
 
-Full API documentation can be found in [API.md](API.md).
+```bash
+git clone <your-repo-url>
+cd geojson.io
+```
 
-## Development
+2. 依存関係をインストールします。
 
-1. Clone this repository
-2. Install dependencies
-3. Run `npm start`
+```bash
+npm install
+```
 
-`npm start` uses `concurrently` to run `live-server` which will serve the project directory in your browser and listen for changes, `rollup` which will build the js and css bundles, and `npx tailwindcss` which builds `css/tailwind_dist.css` (including only the tailwind rules needed in the project)
+3. Mapbox token を設定します。
 
-`rollup` can take several seconds to build before changes appear in the browser.
+```bash
+cp .env.example .env
+```
 
-If you get an error resolving dependencies related to `rollup` on newer versions of node, then try `npm install --force` and be sure to not commit changes to `package-lock.json`.
+`.env` を開き、`MAPBOX_ACCESS_TOKEN` に利用する token を入れてください。
 
-## Production Build & Deployment
+```dotenv
+MAPBOX_ACCESS_TOKEN=pk.xxxxxxxxxxxxxxxxxxxx
+```
 
-`npm run build` will create minified bundles in `/dist`. You can try out the production build with `npm run serve` which will run live-server.
+4. 任意で lint を実行します。
 
-`npm run deploy` runs `deploy.sh`, which creates a production build locally and force-pushes the deployment worktree to the `gh-pages` branch.
+```bash
+npm test
+```
 
-### Netlify Deployment Workflow
+`npm test` は現在 `eslint` の実行です。
 
-このリポジトリでは、デプロイのために 2 つのブランチを使います。
+## ローカル開発
 
-- `main`: ソースコード、ドキュメント、日常の修正作業を行うブランチ
-- `gh-pages`: `npm run deploy` でローカル build した成果物を置く配信用ブランチ
+以下で開発サーバーを起動します。
 
-Netlify 側の設定は次の通りです。
+```bash
+npm start
+```
+
+起動後は `http://127.0.0.1:8080` で確認できます。
+
+`npm start` では次の 3 つが同時に動きます。
+
+- `live-server`: ルートディレクトリを配信
+- `rollup -cw`: JavaScript バンドルを watch build
+- `tailwindcss --watch`: `dist/css/tailwind_dist.css` を再生成
+
+初回の `rollup` ビルドは数秒かかることがあります。ブラウザを開いてすぐ画面が不完全でも、まずビルド完了を待ってください。
+
+## 本番ビルド
+
+本番用の静的アセットを作るときは以下を実行します。
+
+```bash
+npm run build
+```
+
+生成物は `dist/` に出ます。
+
+ビルド済み成果物をローカル確認したい場合は以下です。
+
+```bash
+npm run serve
+```
+
+`index.html` が `dist/` 配下の bundle を読む構成なので、`serve` はプロジェクトルートを配信します。
+
+## デプロイ手順
+
+このリポジトリは `main` で作業し、`gh-pages` ブランチを Netlify の本番配信用ブランチとして使います。
+
+### 実行前の注意
+
+- `npm run deploy` は `gh-pages` ブランチを作り直して `origin/gh-pages` に force push します
+- ローカルの `gh-pages` ブランチも削除して作り直します
+- 作業ツリーが汚れている状態で実行すると戻しづらくなるので、先に commit するか stash してください
+
+### 実行手順
+
+1. `main` にいることを確認します。
+
+```bash
+git branch --show-current
+```
+
+2. 変更を commit します。
+
+```bash
+git status
+git add -A
+git commit -m "your message"
+```
+
+3. デプロイを実行します。
+
+```bash
+npm run deploy
+```
+
+4. スクリプト完了後、Netlify 側で反映を確認します。
+
+`npm run deploy` は内部で [deploy.sh](./deploy.sh) を実行し、次をまとめて行います。
+
+1. 一時的な orphan branch を作成
+2. `npm install`
+3. `npm run build`
+4. `gh-pages` ブランチを再作成
+5. `origin/gh-pages` へ force push
+6. 元のブランチへ戻る
+
+## Netlify 設定
+
+Netlify 側は次の設定にします。
 
 - Production branch: `gh-pages`
 - Build command: 空欄
 - Publish directory: `.`
 
-今後の標準手順は次の通りです。
+独自ドメインを使う場合は、ルートの [CNAME](./CNAME) を公開したいドメイン名に合わせて管理してください。
 
-1. `main` に切り替える
-2. 最新の `main` を pull する
-3. 修正作業を `main` で行う
-4. 必要に応じて `npm start` でローカル確認する
-5. `npm run build` を実行して本番 build が通ることを確認する
-6. `main` の変更を commit / push する
-7. 引き続き `main` で `npm run deploy` を実行する
-8. `gh-pages` に force-push されたことと、Netlify の deploy が始まったことを確認する
+## よくある詰まりどころ
 
-注意点:
+### `MAPBOX_ACCESS_TOKEN` を入れていない
 
-- `gh-pages` は生成物ブランチなので、通常は直接編集しない
-- `main` を push しただけでは公開は更新されず、公開更新には `npm run deploy` が必要
-- `npm run deploy` は `gh-pages` を force-push するため、先に `main` の反映したい変更を commit しておく
-- GitHub Desktop では通常 `main` を確認し、`gh-pages` は生成物確認用と考える
+ビルドは通っても、地図や geocoder が正常に動きません。  
+まず `.env` の値を確認してください。
 
-## License
+### 新しい Node.js で依存解決に失敗する
 
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fmapbox%2Fgeojson.io.svg?type=large)](https://app.fossa.io/projects/git%2Bhttps%3A%2F%2Fgithub.com%2Fmapbox%2Fgeojson.io?ref=badge_large)
+既存 README の注意書きどおり、`rollup` 周りで依存解決エラーが出ることがあります。
+
+```bash
+npm install --force
+```
+
+この回避策で入れ直した場合、`package-lock.json` の差分をそのまま commit しないよう注意してください。
+
+### `npm run deploy` が怖い
+
+その理解で合っています。  
+このスクリプトは安全側の deploy ではなく、`gh-pages` を毎回作り直す前提です。初回は必ず内容を確認してから実行してください。
