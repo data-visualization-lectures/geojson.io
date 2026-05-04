@@ -39,7 +39,16 @@ If you get an error resolving dependencies related to `rollup` on newer versions
 
 `npm run build` will create minified bundles in `/dist`. You can try out the production build with `npm run serve` which will run live-server.
 
-To deploy to github pages, use `npm run deploy`.  This will run the deploy script in `deploy.sh`, which creates a new orphan branch from the current branch, runs a production build, and force pushes to the `gh-pages` branch.
+`npm run deploy` runs `deploy.sh`, which creates a production build locally and force-pushes the deployment worktree to the `gh-pages` branch.
+
+Netlify memo:
+
+- 作業と修正は `main`
+- `main` で `npm run deploy`
+- 生成物は `gh-pages` に force push
+- Netlify の Production branch は `gh-pages`
+- Netlify の Build command は空欄
+- Netlify の Publish directory は `.`
 
 ## License
 
