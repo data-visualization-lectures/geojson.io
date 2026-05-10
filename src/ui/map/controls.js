@@ -3,7 +3,7 @@ class EditControl {
     this.map = map;
     this._container = document.createElement('div');
     this._container.className =
-      'mapboxgl-ctrl-group mapboxgl-ctrl edit-control hidden';
+      'maplibregl-ctrl-group maplibregl-ctrl edit-control hidden';
 
     this._container.innerHTML = `
             <button class="mapbox-gl-draw_ctrl-draw-btn mapbox-gl-draw_edit" title="Edit geometries" style="background-image: url(img/edit.svg); background-size: 13px 13px;">
@@ -41,7 +41,7 @@ class TrashControl {
     this.map = map;
     this._container = document.createElement('div');
     this._container.className =
-      'mapboxgl-ctrl-group mapboxgl-ctrl trash-control';
+      'maplibregl-ctrl-group maplibregl-ctrl trash-control';
     this._container.style = 'display: none;';
     this._container.innerHTML = `
         <button class="mapbox-gl-draw_ctrl-draw-btn mapbox-gl-draw_trash" title="Delete">

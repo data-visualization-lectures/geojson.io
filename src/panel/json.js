@@ -51,7 +51,7 @@ module.exports = function (context) {
       .append('div')
       .attr(
         'class',
-        'mapboxgl-ctrl mapboxgl-ctrl-group absolute right-5 top-5 opacity-0 group-hover:opacity-100 transition-opacity duration-100'
+        'maplibregl-ctrl maplibregl-ctrl-group absolute right-5 top-5 opacity-0 group-hover:opacity-100 transition-opacity duration-100'
       );
 
     const editor = CodeMirror.fromTextArea(textarea.node(), {

@@ -1,30 +1,41 @@
+const OPENFREEMAP_STYLE_BASE = 'https://tiles.openfreemap.org/styles';
+
 module.exports = [
   {
     title: 'Streets',
-    style: 'mapbox://styles/mapbox/streets-v12'
+    style: `${OPENFREEMAP_STYLE_BASE}/bright`,
+    featureColorMode: 'default',
+    enableFog: false
   },
   {
     title: 'Satellite Streets',
-    style: 'mapbox://styles/mapbox/satellite-streets-v12'
+    style: `${OPENFREEMAP_STYLE_BASE}/3d`,
+    featureColorMode: 'satellite',
+    enableFog: false
   },
   {
     title: 'Outdoors',
-    style: 'mapbox://styles/mapbox/outdoors-v12'
+    style: `${OPENFREEMAP_STYLE_BASE}/liberty`,
+    featureColorMode: 'default',
+    enableFog: false
   },
   {
     title: 'Light',
-    style: 'mapbox://styles/mapbox/light-v11'
+    style: `${OPENFREEMAP_STYLE_BASE}/positron`,
+    featureColorMode: 'default',
+    enableFog: true
   },
   {
     title: 'Dark',
-    style: 'mapbox://styles/mapbox/dark-v11'
+    style: `${OPENFREEMAP_STYLE_BASE}/dark`,
+    featureColorMode: 'dark',
+    enableFog: true
   },
   {
     title: 'OSM',
     style: {
       name: 'osm',
       version: 8,
-      glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf',
       sources: {
         'osm-raster-tiles': {
           type: 'raster',
@@ -43,6 +54,8 @@ module.exports = [
           maxzoom: 22
         }
       ]
-    }
+    },
+    featureColorMode: 'default',
+    enableFog: true
   }
 ];

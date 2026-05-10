@@ -1,9 +1,12 @@
-const mapboxgl = require('mapbox-gl');
+const maplibreglModule = require('maplibre-gl');
+const maplibregl = maplibreglModule.default || maplibreglModule;
 
 require('qs-hash');
 const geojsonRewind = require('@mapbox/geojson-rewind');
 const MapboxDraw = require('@mapbox/mapbox-gl-draw');
-const MapboxGeocoder = require('@mapbox/mapbox-gl-geocoder');
+const MaplibreGeocoderModule = require('@maplibre/maplibre-gl-geocoder');
+const MaplibreGeocoder =
+  MaplibreGeocoderModule.default || MaplibreGeocoderModule;
 
 const DrawLineString = require('../draw/linestring');
 const DrawRectangle = require('../draw/rectangle');
@@ -26,6 +29,12 @@ let writable = false;
 let drawing = false;
 let editing = false;
 
+MapboxDraw.constants.classes.CANVAS = 'maplibregl-canvas';
+MapboxDraw.constants.classes.CONTROL_BASE = 'maplibregl-ctrl';
+MapboxDraw.constants.classes.CONTROL_PREFIX = 'maplibregl-ctrl-';
+MapboxDraw.constants.classes.CONTROL_GROUP = 'maplibregl-ctrl-group';
+MapboxDraw.constants.classes.ATTRIBUTION = 'maplibregl-ctrl-attrib';
+
 const dummyGeojson = {
   type: 'FeatureCollection',
   features: [
@@ -37,6 +46,81 @@ const dummyGeojson = {
       }
     }
   ]
+};
+
+function getActiveStyleConfig(context) {
+  const activeStyle = context.storage.get('style') || DEFAULT_STYLE;
+  return styles.find(({ title }) => title === activeStyle) || styles[0];
+}
+
+function getFeatureColor(mode) {
+  switch (mode) {
+    case 'dark':
+      return DEFAULT_LIGHT_FEATURE_COLOR;
+    case 'satellite':
+      return DEFAULT_SATELLITE_FEATURE_COLOR;
+    default:
+      return DEFAULT_DARK_FEATURE_COLOR;
+  }
+}
+
+const geocoderApi = {
+  forwardGeocode: async (config) => {
+    const features = [];
+
+    if (!config.query) {
+      return { features };
+    }
+
+    try {
+      const request = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+        config.query
+      )}&format=geojson&polygon_geojson=1&addressdetails=1&limit=5`;
+      const response = await fetch(request, {
+        headers: {
+          Accept: 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Nominatim request failed: ${response.status}`);
+      }
+
+      const geojson = await response.json();
+
+      for (const feature of geojson.features || []) {
+        let center = null;
+
+        if (feature.bbox) {
+          center = [
+            feature.bbox[0] + (feature.bbox[2] - feature.bbox[0]) / 2,
+            feature.bbox[1] + (feature.bbox[3] - feature.bbox[1]) / 2
+          ];
+        } else if (feature.geometry && feature.geometry.type === 'Point') {
+          center = feature.geometry.coordinates;
+        }
+
+        if (!center) continue;
+
+        features.push({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: center
+          },
+          place_name: feature.properties.display_name,
+          properties: feature.properties,
+          text: feature.properties.display_name,
+          place_type: ['place'],
+          center
+        });
+      }
+    } catch (error) {
+      console.error('Failed to forwardGeocode with error:', error);
+    }
+
+    return { features };
+  }
 };
 
 module.exports = function (context, readonly) {
@@ -87,20 +171,12 @@ module.exports = function (context, readonly) {
   }
 
   function map() {
-    mapboxgl.accessToken = process.env.MAPBOX_ACCESS_TOKEN;
-
-    mapboxgl.setRTLTextPlugin(
-      'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js',
-      null,
-      true
-    );
-
     const projection = context.storage.get('projection') || DEFAULT_PROJECTION;
-    context.storage.set('style', DEFAULT_STYLE);
-    const activeStyle = DEFAULT_STYLE;
-    const { style } = styles.find((d) => d.title === activeStyle);
+    const activeStyle = context.storage.get('style') || DEFAULT_STYLE;
+    context.storage.set('style', activeStyle);
+    const { style } = getActiveStyleConfig(context);
 
-    context.map = new mapboxgl.Map({
+    context.map = new maplibregl.Map({
       container: 'map',
       style,
       center: [139.6917, 35.6895],
@@ -111,9 +187,8 @@ module.exports = function (context, readonly) {
 
     if (writable) {
       context.map.addControl(
-        new MapboxGeocoder({
-          accessToken: mapboxgl.accessToken,
-          mapboxgl,
+        new MaplibreGeocoder(geocoderApi, {
+          maplibregl,
           marker: true
         })
       );
@@ -186,7 +261,7 @@ module.exports = function (context, readonly) {
         ]
       });
 
-      context.map.addControl(new mapboxgl.NavigationControl());
+      context.map.addControl(new maplibregl.NavigationControl());
 
       context.map.addControl(drawControl, 'top-right');
 
@@ -213,7 +288,7 @@ module.exports = function (context, readonly) {
         context.map.setLayoutProperty('map-data-line', 'visibility', 'visible');
 
         // show markers
-        d3.selectAll('.mapboxgl-marker').style('display', 'block');
+        d3.selectAll('.maplibregl-marker').style('display', 'block');
 
         // clean up draw
         context.Draw.changeMode('simple_select');
@@ -225,7 +300,7 @@ module.exports = function (context, readonly) {
 
         // show the edit button and draw tools
         maybeShowEditControl();
-        d3.select('.mapboxgl-ctrl-group:nth-child(3)').style(
+        d3.select('.maplibregl-ctrl-group:nth-child(3)').style(
           'display',
           'block'
         );
@@ -261,7 +336,10 @@ module.exports = function (context, readonly) {
         editing = true;
         // hide the edit button and draw tools
         d3.select('.edit-control').style('display', 'none');
-        d3.select('.mapboxgl-ctrl-group:nth-child(3)').style('display', 'none');
+        d3.select('.maplibregl-ctrl-group:nth-child(3)').style(
+          'display',
+          'none'
+        );
 
         // show the save/cancel control and the delete control
         d3.select('.save-cancel-control').style('display', 'block');
@@ -277,7 +355,7 @@ module.exports = function (context, readonly) {
         context.map.setLayoutProperty('map-data-line', 'visibility', 'none');
 
         // hide markers
-        d3.selectAll('.mapboxgl-marker').style('display', 'none');
+        d3.selectAll('.maplibregl-marker').style('display', 'none');
 
         // import the current data into draw for editing
         const featureIds = context.Draw.add(context.data.get('map'));
@@ -292,22 +370,10 @@ module.exports = function (context, readonly) {
         context.data.get('mapStyleLoaded') &&
         !context.map.getSource('map-data')
       ) {
-        const { name } = context.map.getStyle();
+        const { featureColorMode, enableFog } = getActiveStyleConfig(context);
+        const color = getFeatureColor(featureColorMode);
 
-        let color = DEFAULT_DARK_FEATURE_COLOR; // Sets default dark color for lighter base maps
-
-        // Sets a light color for dark base map
-        if (['Mapbox Dark'].includes(name)) {
-          color = DEFAULT_LIGHT_FEATURE_COLOR;
-        }
-
-        // Sets a brighter color for the satellite base map to help with visibility.
-        if (['Mapbox Satellite Streets'].includes(name)) {
-          color = DEFAULT_SATELLITE_FEATURE_COLOR;
-        }
-
-        // setFog only on Light and Dark
-        if (['Mapbox Light', 'Mapbox Dark', 'osm'].includes(name)) {
+        if (enableFog && typeof context.map.setFog === 'function') {
           context.map.setFog({
             range: [0.5, 10],
             color: '#ffffff',

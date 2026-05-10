@@ -11,7 +11,7 @@ Prj_DatavizJP 向けに調整している `geojson.io` の、初見者向けビ�
 - `npm`
 - GitHub リポジトリへの push 権限
 - Netlify サイトの設定変更権限
-- Mapbox の public access token
+- OpenStreetMap ベースの地図スタイルにアクセスできるネットワーク環境
 
 `package.json` の `engines.node` は `14` です。  
 Node の切り替えに `nvm` を使う場合は、先に以下を実行してください。
@@ -36,19 +36,7 @@ cd geojson.io
 npm install
 ```
 
-3. Mapbox token を設定します。
-
-```bash
-cp .env.example .env
-```
-
-`.env` を開き、`MAPBOX_ACCESS_TOKEN` に利用する token を入れてください。
-
-```dotenv
-MAPBOX_ACCESS_TOKEN=pk.xxxxxxxxxxxxxxxxxxxx
-```
-
-4. 任意で lint を実行します。
+3. 任意で lint を実行します。
 
 ```bash
 npm test
@@ -149,10 +137,14 @@ Netlify 側は次の設定にします。
 
 ## よくある詰まりどころ
 
-### `MAPBOX_ACCESS_TOKEN` を入れていない
+### 地図や geocoder が表示されない
 
-ビルドは通っても、地図や geocoder が正常に動きません。  
-まず `.env` の値を確認してください。
+このプロジェクトは `MapLibre GL JS` と OpenStreetMap ベースのスタイル、Nominatim geocoder を使います。  
+まずネットワークから以下へ接続できるか確認してください。
+
+- `https://tiles.openfreemap.org`
+- `https://tile.openstreetmap.org`
+- `https://nominatim.openstreetmap.org`
 
 ### 新しい Node.js で依存解決に失敗する
 

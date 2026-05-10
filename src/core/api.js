@@ -15,7 +15,7 @@ function api(context) {
   console.log('');
 
   console.log(
-    '%c- window.api.map: the mapboxgl map object',
+    '%c- window.api.map: the maplibregl map object',
     'font-weight:bold;'
   );
   console.log('%O', context.map);

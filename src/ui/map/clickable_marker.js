@@ -1,29 +1,31 @@
 // extend mapboxGL Marker so we can pass in an onClick handler
-const mapboxgl = require('mapbox-gl');
+const maplibreglModule = require('maplibre-gl');
+const maplibregl = maplibreglModule.default || maplibreglModule;
 
-class ClickableMarker extends mapboxgl.Marker {
+class ClickableMarker extends maplibregl.Marker {
   constructor(options, legacyOptions) {
     super(options, legacyOptions);
 
-    const {
-        symbol = "circle",
-        symbolColor = "#fff"
-    } = options
+    const { symbol = 'circle', symbolColor = '#fff' } = options;
 
     if (
-      symbol != "circle" &&
+      symbol !== 'circle' &&
       (makiNames.includes(symbol) || /^[a-z0-9]$/.test(symbol))
     ) {
       const symbolPath = document.createElement('path');
-      this._element.querySelector('circle').replaceWith(symbolPath)
+      this._element.querySelector('circle').replaceWith(symbolPath);
 
       // download svg symbol and insert its path where the circle was
-      const xml = d3.xml(`../dist/icons/${symbol}.svg`, function(err, xml) {
+      d3.xml(`../dist/icons/${symbol}.svg`, (err, xml) => {
         if (err) {
-          console.error(`Error downloading the svg from: ../dist/icons/${symbol}.svg`);
+          console.error(
+            `Error downloading the svg from: ../dist/icons/${symbol}.svg`
+          );
         } else {
           symbolPath.outerHTML = `<path fill="${symbolColor}" transform="translate(6 6)"
-            d="${xml.documentElement.getElementsByTagName("path")[0].getAttribute("d")}"></path>`
+            d="${xml.documentElement
+              .getElementsByTagName('path')[0]
+              .getAttribute('d')}"></path>`;
         }
       });
     }

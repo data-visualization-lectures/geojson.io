@@ -1,4 +1,5 @@
-const mapboxgl = require('mapbox-gl');
+const maplibreglModule = require('maplibre-gl');
+const maplibregl = maplibreglModule.default || maplibreglModule;
 const escape = require('escape-html');
 const length = require('@turf/length').default;
 const area = require('@turf/area').default;
@@ -6,6 +7,7 @@ const area = require('@turf/area').default;
 const popup = require('../../lib/popup');
 const ClickableMarker = require('./clickable_marker');
 const zoomextent = require('../../lib/zoomextent');
+const styles = require('./styles');
 const {
   DEFAULT_DARK_FEATURE_COLOR,
   DEFAULT_LIGHT_FEATURE_COLOR,
@@ -14,7 +16,7 @@ const {
 
 const markers = [];
 
-makiNames = require('@mapbox/maki/layouts/all.json');
+const makiNames = require('@mapbox/maki/layouts/all.json');
 let makiOptions = '';
 
 for (let i = 0; i < makiNames.length; i++) {
@@ -93,14 +95,16 @@ const addMarkers = (geojson, context, writable) => {
     let defaultSymbolColor = '#fff';
 
     const activeStyle = context.storage.get('style');
+    const activeStyleConfig =
+      styles.find(({ title }) => title === activeStyle) || styles[0];
 
     // Adjust the feature color for certain styles to help visibility
-    switch (activeStyle) {
-      case 'Satellite Streets':
+    switch (activeStyleConfig.featureColorMode) {
+      case 'satellite':
         defaultColor = DEFAULT_SATELLITE_FEATURE_COLOR;
         defaultSymbolColor = '#fff';
         break;
-      case 'Dark':
+      case 'dark':
         defaultColor = DEFAULT_LIGHT_FEATURE_COLOR;
         defaultSymbolColor = DEFAULT_DARK_FEATURE_COLOR;
         break;
@@ -162,12 +166,13 @@ const addMarkers = (geojson, context, writable) => {
     });
 
     // Update the dot in the Marker for Dark base map style
-    if (activeStyle === 'Dark')
-      d3.selectAll('.mapboxgl-marker svg circle').style(
+    if (activeStyleConfig.featureColorMode === 'dark') {
+      d3.selectAll('.maplibregl-marker svg circle').style(
         'fill',
         '#555',
         'important'
       );
+    }
 
     markers.push(marker);
   });
@@ -451,7 +456,7 @@ function bindPopup(e, context, writable) {
     right: [-25, -20]
   };
 
-  new mapboxgl.Popup({
+  new maplibregl.Popup({
     closeButton: false,
     maxWidth: '251px',
     offset: popupOffsets,

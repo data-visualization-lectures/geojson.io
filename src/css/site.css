@@ -247,12 +247,12 @@ button.delete-invert:hover {
   box-shadow: none;
 }
 
-.mapboxgl-popup table input {
+.maplibregl-popup table input {
   width: 100%;
   background: transparent;
 }
 
-.mapboxgl-popup input[type='color'] {
+.maplibregl-popup input[type='color'] {
   height: 29px;
 }
 
@@ -558,27 +558,39 @@ div.children a {
   background-image: url('../img/circle.svg');
 }
 
-.fullscreen .mapboxgl-ctrl-top-right {
+.fullscreen .maplibregl-ctrl-top-right {
   margin-top: 40px;
 }
 
 /* override mapbox-gl-geocoder control sytles on mobile */
-.mapboxgl-ctrl-top-right {
+.maplibregl-ctrl-top-right {
   top: 0;
   right: 0;
   left: 0;
 }
 
-.mapboxgl-ctrl-top-right .mapboxgl-ctrl-geocoder {
+.maplibregl-ctrl-top-right .maplibregl-ctrl-geocoder {
   margin: 0;
   border-radius: 0;
 }
 
 @media screen and (min-width: 640px) {
-  .mapboxgl-ctrl-top-right .mapboxgl-ctrl-geocoder {
+  .maplibregl-ctrl-top-right .maplibregl-ctrl-geocoder {
     margin: 10px 10px 0 0;
     border-radius: 4px;
   }
+}
+
+.maplibregl-map.mouse-pointer
+  .maplibregl-canvas-container.maplibregl-interactive {
+  cursor: move;
+}
+
+.maplibregl-map.mode-static.mouse-pointer
+  .maplibregl-canvas-container.maplibregl-interactive {
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
 }
 
 /* override path to fontawesome webfonts */
@@ -592,6 +604,6 @@ div.children a {
 }
 
 /* overrides a tailwind box-sizing on * */
-.mapboxgl-compact {
+.maplibregl-compact {
   box-sizing: initial;
 }

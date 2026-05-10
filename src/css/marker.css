@@ -45,7 +45,7 @@
   background-color: #f7f7f7;
 }
 
-.geojsonio-feature .mapboxgl-popup-content {
+.geojsonio-feature .maplibregl-popup-content {
   float: left;
   padding: 0 !important;
 }
